@@ -1,0 +1,40 @@
+# 🔹 Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 🔹 Virtual Environment
+.venv/
+venv/
+env/
+
+# 🔹 Environment variables
+.env
+
+# 🔹 Logs
+logs/
+*.log
+
+# 🔹 OS files
+.DS_Store
+
+# 🔹 IDE
+.vscode/
+.idea/
+
+# 🔹 Database
+*.db
+*.sqlite3
+
+# 🔹 Pytest / coverage
+.coverage
+htmlcov/
+
+# 🔹 Build
+dist/
+build/
+*.egg-info/
+
+# 🔹 Migrations (if using alembic later)
+alembic/versions/
