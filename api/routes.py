@@ -29,7 +29,7 @@ async def ask(req: AskRequest, db= Depends(get_db)):
         db_repo = DBRepository(db=db)
         logger.info("Calling LLMService.get_answer")
         answer = await llm_service.get_answer(req.question, db_repo)
-        logger.info("Response generated successfully")
+        logger.info(f"Response generated successfully : {answer}")
         return AskResponse(question=req.question, answer=answer)
 
     except Exception as e:

@@ -7,6 +7,7 @@ from utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 class LLMService:
     def __init__(self):
         self.cache = RedisRepository()
@@ -19,11 +20,17 @@ class LLMService:
     async def get_answer(self, question: str, db_repo):
         key = self._key(question)
 
+        logger.info(f"Processing request | key={key[:10]}...")
+
+        # Cache check
         cached = await self.cache.get(key)
         if cached:
-            logger.info("Cache hit")
+            logger.info(f"Cache HIT | key={key[:10]}...")
             return cached
 
+        logger.info("Cache MISS → calling LLM")
+
+        # Retry
         for attempt in range(3):
             try:
                 async with self.semaphore:
@@ -32,14 +39,24 @@ class LLMService:
                         timeout=5
                     )
 
+                logger.info("LLM success")
+
+                # Cache
                 await self.cache.set(key, result, ttl=60)
 
-                await db_repo.save(question=question, answer=result)
+                # DB (fail-safe)
+                try:
+                    await db_repo.save(question=question, answer=result)
+                except Exception as e:
+                    logger.error(f"DB save failed: {e}", exc_info=True)
+
+                logger.info("Saved to Redis + DB")
 
                 return result
 
             except Exception as e:
-                logger.error(f"Attempt {attempt + 1} failed: {e}")
+                logger.warning(f"Attempt {attempt + 1} failed: {e}")
                 await asyncio.sleep(2 ** attempt)
 
+        logger.error("LLM failed after retries", exc_info=True)
         raise Exception("LLM failed after retries")
