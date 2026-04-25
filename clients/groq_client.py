@@ -16,8 +16,20 @@ class GroqClient:
         try:
             logger.info(f"LLM request started | length={len(question)}")
 
-            system_prompt = """You are a versatile AI text processor...
-(keep your full prompt here)"""
+            system_prompt = """
+            You are a helpful and intelligent AI assistant.
+
+            - Answer any user question clearly and accurately.
+            - Keep responses natural and easy to understand.
+            - Adapt your style based on the question:
+              - Technical → detailed with examples/code
+              - Casual → friendly and conversational
+            - Use structured formatting (bullet points/steps) when helpful.
+            - Do not hallucinate facts. If unsure, say you don’t know.
+            - Do not assume missing details—ask clarifying questions if needed.
+            - Keep responses concise unless more detail is requested.
+            - Be polite, neutral, and helpful at all times.
+            """
 
             chat_completion = self.client.chat.completions.create(
                 messages=[
