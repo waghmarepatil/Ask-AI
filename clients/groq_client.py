@@ -49,7 +49,57 @@ class GroqClient:
             logger.error(f"LLM call failed: {e}", exc_info=True)
             raise
 
+    def _sync_generate_with_context(self, question: str, context: str) -> str:
+        try:
+            logger.info(f"RAG LLM request started | question_length={len(question)}")
+
+            system_prompt = """
+            You are a helpful AI assistant.
+
+            - Answer the user's question using ONLY the provided context.
+            - Do not use outside knowledge.
+            - If the answer is not found in the context, say: "Not found in document".
+            - Keep the answer clear and concise.
+            """
+
+            user_prompt = f"""
+    Context:
+    {context}
+
+    Question:
+    {question}
+    """
+
+            chat_completion = self.client.chat.completions.create(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                model="openai/gpt-oss-20b",
+                temperature=0.2
+            )
+
+            result = chat_completion.choices[0].message.content
+
+            logger.info("RAG LLM response received successfully")
+
+            return result
+
+        except Exception as e:
+            logger.error(f"RAG LLM call failed: {e}", exc_info=True)
+            raise
+
+
     async def generate(self, question: str) -> str:
         logger.debug("Dispatching LLM call to thread")
 
         return await asyncio.to_thread(self._sync_generate, question)
+
+    async def generate_with_context(self, question: str, context: str) -> str:
+        logger.debug("Dispatching RAG LLM call to thread")
+
+        return await asyncio.to_thread(
+            self._sync_generate_with_context,
+            question,
+            context
+        )

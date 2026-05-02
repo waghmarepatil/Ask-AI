@@ -1,8 +1,29 @@
 fastapi
 uvicorn
 pydantic
-redis>=5.0.0
 python-dotenv>=1.0.1
+
+# LLM
 groq>=0.11.0
+
+# Database
 sqlalchemy>=2.0.0
 asyncpg
+
+# Cache (Redis async)
+redis>=5.0.0
+
+# File upload (IMPORTANT for Form + UploadFile)
+python-multipart
+
+# PDF processing (RAG)
+pypdf
+
+# Embeddings
+sentence-transformers
+
+# Vector search
+faiss-cpu
+
+# Optional (recommended for production logging / async)
+anyio
